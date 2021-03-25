@@ -1,0 +1,35 @@
+{
+  "name": "mr.hooman-discord-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deninpaulv/Mr.Hooman-Discord-Bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/deninpaulv/Mr.Hooman-Discord-Bot/issues"
+  },
+  "homepage": "https://github.com/deninpaulv/Mr.Hooman-Discord-Bot#readme",
+  "dependencies": {
+    "@discordjs/opus": "^0.5.0",
+    "chalk": "^4.1.0",
+    "discord-player": "^3.4.0",
+    "discord-ytdl-core": "^5.0.2",
+    "discord.js": "^12.5.1",
+    "jsdom": "^16.5.1",
+    "merge-options": "^3.0.4",
+    "node-fetch": "^2.6.1",
+    "parse-ms": "^2.1.0",
+    "reverbnation-scraper": "^2.0.0",
+    "soundcloud-scraper": "^4.0.3",
+    "spotify-url-info": "^2.2.0",
+    "youtube-sr": "^4.0.3",
+    "ytdl-core": "^4.5.0"
+  }
+}

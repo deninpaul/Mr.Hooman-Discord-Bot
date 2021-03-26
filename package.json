@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -17,8 +18,12 @@
   },
   "homepage": "https://github.com/deninpaulv/Mr.Hooman-Discord-Bot#readme",
   "dependencies": {
+    "axios": "^0.21.1",
     "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "fetch": "^1.1.0",
     "ffmpeg": "0.0.4",
+    "nodemon": "^2.0.7",
     "yt-search": "^2.7.5",
     "ytdl-core": "^4.5.0"
   }

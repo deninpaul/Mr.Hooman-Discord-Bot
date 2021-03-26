@@ -1,6 +1,7 @@
 // Stuff Mr.Hooman requires
 const Discord = require('discord.js');
 const config = require("./utils/config.js");
+require("dotenv").config()
 const fs = require('fs');
 
 
@@ -9,7 +10,7 @@ const client = new Discord.Client();
 client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
 client.config = require('./utils/config.js');
-client.login(config.token_bot);
+client.login(config.token_bot || process.env.token);
 const jsCommandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
 
 

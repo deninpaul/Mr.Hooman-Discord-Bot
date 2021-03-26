@@ -1,6 +1,6 @@
 module.exports = {
     name: "avatar",
-    aliases: [],
+    aliases: ["setmood", " avatar", " setmood", "mood", " mood"],
     execute(message, args) {
         message.channel.startTyping();
         const image = require("./../utils/strings.js");

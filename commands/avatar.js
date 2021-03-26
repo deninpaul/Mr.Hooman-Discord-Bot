@@ -3,11 +3,14 @@ module.exports = {
     aliases: [],
     execute(message, args) {
         const image = require("./../utils/strings.js");
-        const newImage = image[args];
-        message.client.user.setAvatar(newImage).then(() => {
-            message.channel.send(`I have been changed to a ${camelize(args)} Hooman`)
-        })
-
+        const newImage = image[args]; var flag = 0;
+        try {
+            message.client.user.setAvatar(newImage).then( () =>{
+                message.channel.send(`I have been changed to a ${camelize(args[0])} Hooman`);
+            });
+        } catch (e) {
+            message.channel.send("Oops! Mr.Hooman has caught up in a mood swing, thanks to your continuosly acts of changing his personality. Please leave him alone for a while 😤");
+        }
     }
 };
 

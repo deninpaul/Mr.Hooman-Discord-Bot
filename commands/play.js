@@ -4,7 +4,7 @@ const ytSearch = require('yt-search');
 module.exports = {
     name: "play",
     aliases: ["p", " p", " play"],
-    async execute(message, args) {
+    async execute(client, message, args, Discord) {
 
         //Checking if user is connected to Voice Channel
         const voiceChannel = message.member.voice.channel;

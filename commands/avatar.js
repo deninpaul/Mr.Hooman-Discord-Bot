@@ -1,7 +1,7 @@
 module.exports = {
     name: "avatar",
     aliases: ["setmood", " avatar", " setmood", "mood", " mood"],
-    execute(message, args) {
+    execute(client, message, args, Discord) {
         message.channel.startTyping();
         const image = require("./../utils/strings.js");
         const newImage = image[args]; var flag = 0;

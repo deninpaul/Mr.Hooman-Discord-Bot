@@ -4,7 +4,7 @@ module.exports = {
   name: "whichanime",
   aliases: ["whichani", "wa"],
   description: "Tell you about the anime in an image",
-  execute(message, args) {
+  execute(client, message, args, Discord) {
     console.log(args);
     message.channel.startTyping();
 

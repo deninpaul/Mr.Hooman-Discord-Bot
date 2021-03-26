@@ -7,6 +7,7 @@ module.exports = {
   execute(message, args) {
     console.log(args);
     message.channel.startTyping();
+
     axios.get("https://trace.moe/api/search?url=" + args[0])
       .then((res) => {
         console.log(res.data.docs[0].anime)
@@ -14,7 +15,8 @@ module.exports = {
       })
       .catch((e) => {
         console.log(e);
-      })
+    })
+
     message.channel.stopTyping();
   }
 }

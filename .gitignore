@@ -1,3 +1,4 @@
 node_modules
-utils/config.js
+config.js
 .env
+utils/config.js

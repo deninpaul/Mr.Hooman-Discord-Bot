@@ -11,7 +11,7 @@ module.exports = {
             })
             .catch((e) => {
                 console.log(e);
-                message.channel.send("Mr.Hooman is tired of your continuosly acts of changing his Avatar. Please leave him alone for a while ):(");
+                message.channel.send("Mr.Hooman is tired of your continuosly acts of changing his Avatar. Please leave him alone for a while 😤");
             });
         message.channel.stopTyping();
     }

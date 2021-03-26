@@ -1,17 +1,19 @@
-//>> Stuff Mr.Hooman requires ヾ(⌐■_■)ノ
+// Stuff Mr.Hooman requires
 const Discord = require('discord.js');
-const config = require("./config.js");
+const config = require("./utils/config.js");
 const fs = require('fs');
 
-//>> Initialzing variables in Mr.Hooman o((⊙﹏⊙))o.
+
+// Initialzing variables in Mr.Hooman
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
-client.config = require('./config.js');
+client.config = require('./utils/config.js');
 client.login(config.token_bot);
 const jsCommandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
 
-//>> Shipping features to Mr.Hooman ＼（〇_ｏ）／
+
+// Shipping features to Mr.Hooman
 for (const file of jsCommandFiles) {
     console.log(`Loaded ${file}`);
     const pull = require(`./commands/${file}`);
@@ -22,16 +24,17 @@ for (const file of jsCommandFiles) {
     });
 }
 
-//>> Mr.Hooman is getting ready (⊙_⊙;)
+
+// Mr.Hooman is getting ready
 client.once('ready', () => {
     console.log('Mr.Hooman is online!');
     client.user.setPresence({ activity: { name: `with Hoomans`, type: "PLAYING" } });
 });
 
-//>> Mr.Hooman is up and ready at your service （*＾-＾*）
+
+// Mr.Hooman is up and ready at your service
 client.on('message', message => {
-    if (!message.content.startsWith(config.prefix) || message.author.bot)
-        return;
+    if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
     const args = message.content.slice(config.prefix.length).split(/ +/);
     const command = args.shift().toLowerCase();

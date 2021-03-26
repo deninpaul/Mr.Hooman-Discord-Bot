@@ -1,3 +1,6 @@
+const avatar = require("./avatar.js");
+const image = require("./../utils/strings.js");
+
 module.exports = {
     name: "ping",
     aliases: ["hello"],

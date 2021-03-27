@@ -1,7 +1,7 @@
 module.exports = {
     name: "leave",
     aliases: ["l", " l", "exit", " exit", "stop", " stop"],
-    async execute(client, message, args, Discord) {
+    async execute(client, message, cmd, args, Discord) {
         message.channel.startTyping();
 
         const voiceChannel = message.member.voice.channel;

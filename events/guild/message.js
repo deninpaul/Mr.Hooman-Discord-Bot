@@ -10,7 +10,7 @@ module.exports = (Discord, client, message) => {
     if (!commandFile) return;
 
     try {
-        commandFile.execute(client, message, args, Discord);
+        commandFile.execute(client, message, command, args, Discord);
     } catch (e) {
         return message.channel.send(`An error occured on ${command} :\n ${e.message}`);
     }

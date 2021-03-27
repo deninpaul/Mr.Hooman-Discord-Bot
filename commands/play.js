@@ -1,78 +1,138 @@
 const ytdl = require('ytdl-core');
 const ytSearch = require('yt-search');
 
+const queue = new Map();
+
 module.exports = {
-    name: "play",
-    aliases: ["p", " p", " play"],
-    async execute(client, message, args, Discord) {
+  name: "play",
+  aliases: ["p", "play", "stop", "skip", "next", "leave"],
+  async execute(client, message, cmd, args, Discord) {
 
-        //Checking if user is connected to Voice Channel
-        const voiceChannel = message.member.voice.channel;
-        if (!voiceChannel) {
-            return message.channel.send("Mr.Hooman is scared of being alone in a Voice Channel! Please join a Voice Channel before executing this command.");
-        }
-
-        //Check if Mr.Hooman has all the necessary perms
-        const permissions = voiceChannel.permissionsFor(message.client.user);
-        if (!permissions.has('CONNECT')) {
-            return message.channel.send("Mr.Hooman says he doesn't have the CONNECT permissions 😥");
-        } if (!permissions.has('SPEAK')) {
-            return message.channel.send("Mr.Hooman says he can't SPEAK in the Voice Channel 😥.");
-        } if (!args.length) {
-            return message.channel.send("Mr.Hooman can't read your mind! So add in a query after the PLAY Command!")
-        }
-
-        //Typing indicator
-        message.channel.startTyping();
-
-        //Playing by given URL
-        if (ytdl.validateURL(args[0])) {
-            try {
-                const connection = await voiceChannel.join();
-                const stream = ytdl(args[0], { filter: 'audioonly' });
-
-                connection.play(stream, { seek: 0, volume: 1 })
-                    .on('finish', () => {
-                        voiceChannel.leave();
-                        message.channel.send('leaving channel');
-                    });
-
-                var info = await ytdl.getInfo(args[0]);
-                await message.channel.send(`:thumbsup: Now Playing ***${info.videoDetails.title}***`)
-            } catch (e) {
-                console.log(e)
-                message.channel.send("Oops! Mr.Hooman is having trouble playing the music. Please contact his therapist!");
-            } finally {
-                message.channel.stopTyping();
-                return;
-            }
-        }
-
-        //Play by searching through a query
-        try {
-            const connection = await voiceChannel.join();
-            const videoFinder = async (query) => {
-                const videoResult = await ytSearch(query);
-                return (videoResult.videos.length > 1) ? videoResult.videos[0] : null;
-            }
-
-            const video = await videoFinder(args.join(' '));
-
-            if (video) {
-                const stream = ytdl(video.url, { filter: 'audioonly' });
-                connection.play(stream, { seek: 0, volume: 1 })
-                    .on('finish', () => {
-                        voiceChannel.leave();
-                    });
-                await message.reply(`👍 Now Playing ***${video.title}***`);
-            } else {
-                message.channel.send("Mr.Hooman couldn't find any video 😥");
-            }
-        } catch (e) {
-            message.channel.send(`Oops! Mr.Hooman is having trouble playing the music. Please contact his therapist!. Error: ${e}`);
-        } finally {
-            message.channel.stopTyping();
-            return;
-        }
+    //Checking if user is connected to Voice Channel
+    const voiceChannel = message.member.voice.channel;
+    if (!voiceChannel) {
+      return message.channel.send("Mr.Hooman is scared of being alone in a Voice Channel! Please join a Voice Channel before executing this command.");
     }
+
+    //Check if Mr.Hooman has all the necessary perms
+    const permissions = voiceChannel.permissionsFor(message.client.user);
+    if (!permissions.has('CONNECT')) {
+      return message.channel.send("Mr.Hooman says he doesn't have the CONNECT permissions 😥");
+    } if (!permissions.has('SPEAK')) {
+      return message.channel.send("Mr.Hooman says he can't SPEAK in the Voice Channel 😥.");
+    }
+
+    //Typing indicator
+    message.channel.startTyping();
+
+    //This is our server queue. We are getting this server queue from the global queue.
+    const serverQueue = queue.get(message.guild.id);
+
+    //If the user has used the play command
+    if (cmd === 'play' || cmd === 'p') {
+      if (!args.length)
+        return message.channel.send("Mr.Hooman can't read your mind! So add in a query after the PLAY Command!");
+
+      let song = {};
+
+      //Mr.Hooman is searching for your songs
+      if (ytdl.validateURL(args[0])) {
+        const songInfo = await ytdl.getInfo(args[0]);
+        song = {
+          title: songInfo.videoDetails.title, url: songInfo.videoDetails.video_url
+        }
+      } else {
+        //If there was no link, we use keywords to search for a video. Set the song object to have two keys. Title and URl.
+        const videoFinder = async (query) => {
+          const videoResult = await ytSearch(query);
+          return (videoResult.videos.length > 1) ? videoResult.videos[0] : null;
+        }
+        const video = await videoFinder(args.join(' '));
+        if (video) {
+          song = { title: video.title, url: video.url };
+        } else {
+          message.channel.send('"Oops! Mr.Hooman is having trouble finding your track. Please contact his therapist!"');
+        }
+      }
+
+      //If the server queue does not exist, create one!
+      if (!serverQueue) {
+
+        const queueConstructor = {
+          voiceChannel: voiceChannel,
+          textChannel: message.channel,
+          connection: null,
+          songs: []
+        }
+
+        //Add our key and value pair into the global queue. We then use this to get our server queue.
+        queue.set(message.guild.id, queueConstructor);
+        queueConstructor.songs.push(song);
+
+        //Establish a connection and play the song
+        try {
+          const connection = await voiceChannel.join();
+          queueConstructor.connection = connection;
+          videoPlayer(message.guild, queueConstructor.songs[0]);
+        } catch (err) {
+          queue.delete(message.guild.id);
+          message.channel.send("Oops! Mr.Hooman is having trouble playing your music. Please contact his therapist!");
+          console.log(err);
+        }
+      } else {
+        serverQueue.songs.push(song);
+        message.channel.stopTyping();
+        return message.channel.send(`👍 **${song.title}** added to queue!`);
+      }
+    }
+
+    else if (cmd === 'skip' || cmd === 'next') skipSong(message, serverQueue);
+    else if (cmd === 'stop' || cmd === 'leave') stopSong(message, serverQueue);
+
+    //Stop tying indicator
+    message.channel.stopTyping();
+  }
+}
+
+//Let's Mr.Hooman Play songs
+const videoPlayer = async (guild, song) => {
+  const songQueue = queue.get(guild.id);
+
+  if (!song) {
+    songQueue.voiceChannel.leave();
+    queue.delete(guild.id);
+    message.channel.stopTyping();
+    return;
+  }
+
+  const stream = ytdl(song.url, { filter: 'audioonly' });
+  songQueue.connection.play(stream, { seek: 0, volume: 0.5 })
+    .on('finish', () => {
+      songQueue.songs.shift();
+      videoPlayer(guild, songQueue.songs[0]);
+    });
+  await songQueue.textChannel.send(`👍 Now Playing **${song.title}**`)
+}
+
+//Let's Mr.Hooman Skip Songs
+const skipSong = (message, serverQueue) => {
+  if (!message.member.voice.channel) {
+    message.channel.stopTyping();
+    return message.channel.send('Mr.Hooman says he needs you to be in a channel to execute this command!');
+  }
+  if (!serverQueue) {
+    message.channel.stopTyping();
+    return message.channel.send(`There are no songs in queue 😔`);
+  }
+  serverQueue.connection.dispatcher.end();
+}
+
+//Let's Mr.Hooman Stop Songs
+const stopSong = (message, serverQueue) => {
+  if (!message.member.voice.channel) {
+    message.channel.stopTyping();
+    return message.channel.send('Mr.Hooman says he needs you to be in a channel to execute this command!');
+  }
+  serverQueue.songs = [];
+  serverQueue.connection.dispatcher.end();
 }

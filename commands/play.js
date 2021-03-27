@@ -1,12 +1,10 @@
 const ytdl = require('ytdl-core');
 const ytSearch = require('yt-search');
 
-const queue = new Map();
-
 module.exports = {
   name: "play",
-  aliases: ["p", "play", "stop", "skip", "next", "leave"],
-  async execute(client, message, cmd, args, Discord) {
+  aliases: ["p", "play", "next"],
+  async execute(message, cmd, args) {
 
     //Checking if user is connected to Voice Channel
     const voiceChannel = message.member.voice.channel;
@@ -22,16 +20,16 @@ module.exports = {
       return message.channel.send("Mr.Hooman says he can't SPEAK in the Voice Channel 😥.");
     }
 
-    //Typing indicator
-    message.channel.startTyping();
-
     //This is our server queue. We are getting this server queue from the global queue.
-    const serverQueue = queue.get(message.guild.id);
+    const serverQueue = client.queue.get(message.guild.id);
 
     //If the user has used the play command
     if (cmd === 'play' || cmd === 'p') {
       if (!args.length)
         return message.channel.send("Mr.Hooman can't read your mind! So add in a query after the PLAY Command!");
+
+      //Typing indicator
+      message.channel.startTyping();
 
       let song = {};
 
@@ -66,7 +64,7 @@ module.exports = {
         }
 
         //Add our key and value pair into the global queue. We then use this to get our server queue.
-        queue.set(message.guild.id, queueConstructor);
+        client.queue.set(message.guild.id, queueConstructor);
         queueConstructor.songs.push(song);
 
         //Establish a connection and play the song
@@ -86,9 +84,6 @@ module.exports = {
       }
     }
 
-    else if (cmd === 'skip' || cmd === 'next') skipSong(message, serverQueue);
-    else if (cmd === 'stop' || cmd === 'leave') stopSong(message, serverQueue);
-
     //Stop tying indicator
     message.channel.stopTyping();
   }
@@ -96,12 +91,13 @@ module.exports = {
 
 //Let's Mr.Hooman Play songs
 const videoPlayer = async (guild, song) => {
+  
+  queue = guild.client.queue;
   const songQueue = queue.get(guild.id);
 
   if (!song) {
     songQueue.voiceChannel.leave();
     queue.delete(guild.id);
-    message.channel.stopTyping();
     return;
   }
 
@@ -111,28 +107,6 @@ const videoPlayer = async (guild, song) => {
       songQueue.songs.shift();
       videoPlayer(guild, songQueue.songs[0]);
     });
+
   await songQueue.textChannel.send(`👍 Now Playing **${song.title}**`)
-}
-
-//Let's Mr.Hooman Skip Songs
-const skipSong = (message, serverQueue) => {
-  if (!message.member.voice.channel) {
-    message.channel.stopTyping();
-    return message.channel.send('Mr.Hooman says he needs you to be in a channel to execute this command!');
-  }
-  if (!serverQueue) {
-    message.channel.stopTyping();
-    return message.channel.send(`There are no songs in queue 😔`);
-  }
-  serverQueue.connection.dispatcher.end();
-}
-
-//Let's Mr.Hooman Stop Songs
-const stopSong = (message, serverQueue) => {
-  if (!message.member.voice.channel) {
-    message.channel.stopTyping();
-    return message.channel.send('Mr.Hooman says he needs you to be in a channel to execute this command!');
-  }
-  serverQueue.songs = [];
-  serverQueue.connection.dispatcher.end();
 }

@@ -1,4 +1,4 @@
-const config = require("../../utils/config.js");
+const config = require("../utils/config.js");
 
 module.exports = (Discord, client, message) => {
     if (!message.content.startsWith(config.prefix) || message.author.bot) return;

@@ -25,15 +25,8 @@ module.exports = {
         //Typing indicator
         message.channel.startTyping();
 
-        //Check if URL is Valid
-        const validURL = (str) => {
-            var regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
-            if (!regex.test(str)) return false;
-            else return true;
-        }
-
         //Playing by given URL
-        if (validURL(args[0])) {
+        if (ytdl.validateURL(args[0])) {
             try {
                 const connection = await voiceChannel.join();
                 const stream = ytdl(args[0], { filter: 'audioonly' });

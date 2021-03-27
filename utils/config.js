@@ -1,4 +1,4 @@
 module.exports = {
     "prefix": ".",
-    "token_bot": process.env.token,
+    "token_bot": "ODI0NjYxNjUwNjAyODUyNDQ0.YFyoAg.US9RakaallaICGfEpINcVuxrnDQ",
 }

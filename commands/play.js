@@ -21,7 +21,7 @@ module.exports = {
     }
 
     //This is our server queue. We are getting this server queue from the global queue.
-    const serverQueue = client.queue.get(message.guild.id);
+    const serverQueue = message.client.queue.get(message.guild.id);
 
     //If the user has used the play command
     if (cmd === 'play' || cmd === 'p') {
@@ -64,7 +64,7 @@ module.exports = {
         }
 
         //Add our key and value pair into the global queue. We then use this to get our server queue.
-        client.queue.set(message.guild.id, queueConstructor);
+        message.client.queue.set(message.guild.id, queueConstructor);
         queueConstructor.songs.push(song);
 
         //Establish a connection and play the song
@@ -73,7 +73,7 @@ module.exports = {
           queueConstructor.connection = connection;
           videoPlayer(message.guild, queueConstructor.songs[0]);
         } catch (err) {
-          queue.delete(message.guild.id);
+          message.client.queue.delete(message.guild.id);
           message.channel.send("Oops! Mr.Hooman is having trouble playing your music. Please contact his therapist!");
           console.log(err);
         }
@@ -97,7 +97,7 @@ const videoPlayer = async (guild, song) => {
 
   if (!song) {
     songQueue.voiceChannel.leave();
-    queue.delete(guild.id);
+    guild.client.queue.delete(guild.id);
     return;
   }
 

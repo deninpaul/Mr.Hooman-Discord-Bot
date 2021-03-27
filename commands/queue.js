@@ -3,7 +3,15 @@ module.exports = {
   aliases: [],
   execute(message, cmd, args) {
 
-    const serverQueue = client.queue.get(message.guild.id);
-    
+    const serverQueue = message.client.queue.get(message.guild.id);
+    var queueString = "`";
+
+    for (index in serverQueue.songs){
+      queueString += serverQueue.songs[index].title + "`, `" 
+    }
+
+    queueString += " `";
+
+    message.channel.send(queueString);
   }
 }

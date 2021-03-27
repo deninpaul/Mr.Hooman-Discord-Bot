@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/deninpaulv/Mr.Hooman-Discord-Bot#readme",
   "dependencies": {
+    "@discordjs/opus": "^0.5.0",
     "axios": "^0.21.1",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",

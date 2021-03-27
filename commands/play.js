@@ -69,7 +69,7 @@ module.exports = {
                 message.channel.send("Mr.Hooman couldn't find any video 😥");
             }
         } catch (e) {
-            message.channel.send("Oops! Mr.Hooman is having trouble playing the music. Please contact his therapist!");
+            message.channel.send(`Oops! Mr.Hooman is having trouble playing the music. Please contact his therapist!. Error: ${e}`);
         } finally {
             message.channel.stopTyping();
             return;

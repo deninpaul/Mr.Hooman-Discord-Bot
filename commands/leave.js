@@ -10,8 +10,8 @@ module.exports = {
       return message.channel.send('Mr.Hooman says he needs you to be in a channel to execute this command!');
     }
 
-    message.channel.send("Hope you had a great time with Mr.Hooman 👋!");
     serverQueue.songs = [];
+    message.channel.send("Hope you had a great time with Mr.Hooman 👋!");
     serverQueue.connection.dispatcher.end();
   }
 }

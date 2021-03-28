@@ -7,11 +7,11 @@ module.exports = {
     var queueString = "`";
 
     for (index in serverQueue.songs) {
-      queueString += serverQueue.songs[index].title + "`,\n`"
-
-      queueString += " `";
-
-      message.channel.send(queueString);
+      queueString += serverQueue.songs[index].title + "`,\n `"
     }
+
+    queueString += " `";
+    message.channel.send(queueString);
+
   }
 }

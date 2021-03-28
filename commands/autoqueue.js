@@ -6,6 +6,7 @@ module.exports = {
   async execute(message, cmd, args) {
 
     const serverQueue = message.client.queue.get(message.guild.id);
+    message.channel.startTyping();
 
     if (serverQueue) {
       const currentSong = serverQueue.songs[0].title;
@@ -17,7 +18,7 @@ module.exports = {
       const playlist = await api.getPlaylist(result.content[1].browseId);
 
       //adding playlist songs to queue
-      for (index in playlist.content){
+      for (let index =1; index<playlist.content.length; index++){
         const song = {
           title: playlist.content[index].name,
           url:("https://youtube.com/watch?v=" + playlist.content[index].videoId),

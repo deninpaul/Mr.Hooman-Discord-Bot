@@ -6,12 +6,12 @@ module.exports = {
     const serverQueue = message.client.queue.get(message.guild.id);
     var queueString = "`";
 
-    for (index in serverQueue.songs){
-      queueString += serverQueue.songs[index].title + "`,\n`" 
+    for (index in serverQueue.songs) {
+      queueString += serverQueue.songs[index].title + "`,\n`"
+
+      queueString += " `";
+
+      message.channel.send(queueString);
     }
-
-    queueString += " `";
-
-    message.channel.send(queueString);
   }
 }

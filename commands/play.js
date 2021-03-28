@@ -3,7 +3,7 @@ const ytSearch = require('yt-search');
 
 module.exports = {
   name: "play",
-  aliases: ["p", "play", "next"],
+  aliases: ["p", "play"],
   async execute(message, cmd, args) {
 
     //Checking if user is connected to Voice Channel
@@ -21,67 +21,74 @@ module.exports = {
     }
 
     //This is our server queue. We are getting this server queue from the global queue.
-    const serverQueue = client.queue.get(message.guild.id);
+    const serverQueue = message.client.queue.get(message.guild.id);
 
-    //If the user has used the play command
-    if (cmd === 'play' || cmd === 'p') {
-      if (!args.length)
-        return message.channel.send("Mr.Hooman can't read your mind! So add in a query after the PLAY Command!");
+    if (!args.length)
+      return message.channel.send("Mr.Hooman can't read your mind! So add in a query after the PLAY Command!");
 
-      //Typing indicator
-      message.channel.startTyping();
+    //Typing indicator
+    message.channel.startTyping();
 
-      let song = {};
+    let song = {};
 
-      //Mr.Hooman is searching for your songs
-      if (ytdl.validateURL(args[0])) {
-        const songInfo = await ytdl.getInfo(args[0]);
+    //If the query is a link
+    if (ytdl.validateURL(args[0])) {
+      const songInfo = await ytdl.getInfo(args[0]);
+      song = {
+        title: songInfo.videoDetails.title,
+        url: songInfo.videoDetails.video_url,
+        thumbnail: songInfo.videoDetails.thumbnails[0],
+        duration: songInfo.videoDetails.duration
+      }
+    }
+
+     //If there was no link, we use keywords to search for a video. Set the song object to have two keys. Title and URl.
+    else {
+      const videoFinder = async (query) => {
+        const videoResult = await ytSearch(query);
+        return (videoResult.videos.length > 1) ? videoResult.videos[0] : null;
+      }
+      const video = await videoFinder(args.join(' '));
+      if (video) {
         song = {
-          title: songInfo.videoDetails.title, url: songInfo.videoDetails.video_url
-        }
+          title: video.title,
+          url: video.url,
+          thumbnail: video.thumbnail,
+          duration: video.duration,
+        };
       } else {
-        //If there was no link, we use keywords to search for a video. Set the song object to have two keys. Title and URl.
-        const videoFinder = async (query) => {
-          const videoResult = await ytSearch(query);
-          return (videoResult.videos.length > 1) ? videoResult.videos[0] : null;
-        }
-        const video = await videoFinder(args.join(' '));
-        if (video) {
-          song = { title: video.title, url: video.url };
-        } else {
-          message.channel.send('"Oops! Mr.Hooman is having trouble finding your track. Please contact his therapist!"');
-        }
+        message.channel.send('"Oops! Mr.Hooman is having trouble finding your track. Please contact his therapist!"');
+      }
+    }
+
+    //If the server queue does not exist, create one!
+    if (!serverQueue) {
+
+      const queueConstructor = {
+        voiceChannel: voiceChannel,
+        textChannel: message.channel,
+        connection: null,
+        songs: []
       }
 
-      //If the server queue does not exist, create one!
-      if (!serverQueue) {
+      //Add our key and value pair into the global queue. We then use this to get our server queue.
+      message.client.queue.set(message.guild.id, queueConstructor);
+      queueConstructor.songs.push(song);
 
-        const queueConstructor = {
-          voiceChannel: voiceChannel,
-          textChannel: message.channel,
-          connection: null,
-          songs: []
-        }
-
-        //Add our key and value pair into the global queue. We then use this to get our server queue.
-        client.queue.set(message.guild.id, queueConstructor);
-        queueConstructor.songs.push(song);
-
-        //Establish a connection and play the song
-        try {
-          const connection = await voiceChannel.join();
-          queueConstructor.connection = connection;
-          videoPlayer(message.guild, queueConstructor.songs[0]);
-        } catch (err) {
-          queue.delete(message.guild.id);
-          message.channel.send("Oops! Mr.Hooman is having trouble playing your music. Please contact his therapist!");
-          console.log(err);
-        }
-      } else {
-        serverQueue.songs.push(song);
-        message.channel.stopTyping();
-        return message.channel.send(`👍 **${song.title}** added to queue!`);
+      //Establish a connection and play the song
+      try {
+        const connection = await voiceChannel.join();
+        queueConstructor.connection = connection;
+        videoPlayer(message.guild, queueConstructor.songs[0]);
+      } catch (err) {
+        message.client.queue.delete(message.guild.id);
+        message.channel.send("Oops! Mr.Hooman is having trouble playing your music. Please contact his therapist!");
+        console.log(err);
       }
+    } else {
+      serverQueue.songs.push(song);
+      message.channel.stopTyping();
+      return message.channel.send(`👍 **${song.title}** added to queue!`);
     }
 
     //Stop tying indicator
@@ -91,13 +98,13 @@ module.exports = {
 
 //Let's Mr.Hooman Play songs
 const videoPlayer = async (guild, song) => {
-  
+
   queue = guild.client.queue;
   const songQueue = queue.get(guild.id);
 
   if (!song) {
     songQueue.voiceChannel.leave();
-    queue.delete(guild.id);
+    guild.client.queue.delete(guild.id);
     return;
   }
 

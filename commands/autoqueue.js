@@ -23,7 +23,8 @@ module.exports = {
           title: playlist.content[index].name,
           url:("https://youtube.com/watch?v=" + playlist.content[index].videoId),
           thumbnail: playlist.content[index].thumbnails[0],
-          duration: playlist.content[index].duration,    
+          duration: playlist.content[index].duration,
+          startTime: "",
         };
         serverQueue.songs.push(song);
       }

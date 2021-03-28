@@ -1,5 +1,6 @@
 const ytdl = require('ytdl-core');
 const ytSearch = require('yt-search');
+const moment = require('moment');
 
 module.exports = {
   name: "play",
@@ -38,11 +39,12 @@ module.exports = {
         title: songInfo.videoDetails.title,
         url: songInfo.videoDetails.video_url,
         thumbnail: songInfo.videoDetails.thumbnails[0],
-        duration: songInfo.videoDetails.duration
+        duration: songInfo.videoDetails.duration,
+        startTime: "",
       }
     }
 
-     //If there was no link, we use keywords to search for a video. Set the song object to have two keys. Title and URl.
+    //If there was no link, we use keywords to search for a video. Set the song object to have two keys. Title and URl.
     else {
       const videoFinder = async (query) => {
         const videoResult = await ytSearch(query);
@@ -55,6 +57,7 @@ module.exports = {
           url: video.url,
           thumbnail: video.thumbnail,
           duration: video.duration,
+          startTime: "",
         };
       } else {
         message.channel.send('"Oops! Mr.Hooman is having trouble finding your track. Please contact his therapist!"');
@@ -104,16 +107,22 @@ const videoPlayer = async (guild, song) => {
 
   if (!song) {
     songQueue.voiceChannel.leave();
-    guild.client.queue.delete(guild.id);
+    queue.delete(guild.id);
     return;
   }
 
-  const stream = ytdl(song.url, { filter: 'audioonly' });
-  songQueue.connection.play(stream, { seek: 0, volume: 0.5 })
+  const stream = await ytdl(song.url, { filter: 'audioonly' });
+
+  await songQueue.connection.play(stream, { seek: 0, volume: 1 })
     .on('finish', () => {
       songQueue.songs.shift();
       videoPlayer(guild, songQueue.songs[0]);
     });
+
+  //Add start time to the song to calculate elapsed time later
+  const currentTime = await moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  if (queue.get(guild.id).songs[0])
+    queue.get(guild.id).songs[0].startTime = currentTime.toString();
 
   await songQueue.textChannel.send(`👍 Now Playing **${song.title}**`)
 }

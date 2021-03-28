@@ -6,6 +6,6 @@ module.exports = {
     aliases: ["hello"],
     description: "this is a ping command!",
     execute(message, cmd, args) {
-        message.channel.send('Mr.Hooman says pong!');
+        message.channel.send(`Mr.Hooman said pong after ${message.client.ws.ping}ms!`);
     }
 }

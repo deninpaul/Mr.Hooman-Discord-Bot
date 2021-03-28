@@ -15,6 +15,5 @@ module.exports = {
 
     message.channel.stopTyping();
     serverQueue.connection.dispatcher.end();
-
   }
 }

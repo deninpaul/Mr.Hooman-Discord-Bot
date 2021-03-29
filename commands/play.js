@@ -44,8 +44,6 @@ module.exports = {
         startTime: "",
         requested: message.author.username,
       }
-
-      
     }
 
     //If there was no link, we use keywords to search for a video. Set the song object to have two keys. Title and URl.

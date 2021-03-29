@@ -25,6 +25,7 @@ module.exports = {
           thumbnail: playlist.content[index].thumbnails[0],
           duration: playlist.content[index].duration,
           startTime: "",
+          requested: message.author.username,
         };
         serverQueue.songs.push(song);
       }

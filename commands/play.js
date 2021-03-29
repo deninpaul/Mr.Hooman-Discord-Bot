@@ -1,31 +1,32 @@
 const ytdl = require('ytdl-core');
 const ytSearch = require('yt-search');
 const moment = require('moment');
+const embed = require('../utils/embeds.js');
 
 module.exports = {
   name: "play",
   aliases: ["p", "play"],
   async execute(message, cmd, args) {
 
-    //Checking if user is connected to Voice Channel
     const voiceChannel = message.member.voice.channel;
+
+    //Checking if user is connected to Voice Channel
     if (!voiceChannel) {
-      return message.channel.send("Mr.Hooman is scared of being alone in a Voice Channel! Please join a Voice Channel before executing this command.");
+      return message.channel.send(embed.CONNECT_VOICE_MESSAGE);
     }
 
     //Check if Mr.Hooman has all the necessary perms
     const permissions = voiceChannel.permissionsFor(message.client.user);
     if (!permissions.has('CONNECT')) {
-      return message.channel.send("Mr.Hooman says he doesn't have the CONNECT permissions 😥");
+      return message.channel.send(embed.MISSING_CONNECT_PERM_MESSAGE);
     } if (!permissions.has('SPEAK')) {
-      return message.channel.send("Mr.Hooman says he can't SPEAK in the Voice Channel 😥.");
+      return message.channel.send(embed.MISSING_VOICE_PERM_MESSAGE);
     }
 
     //This is our server queue. We are getting this server queue from the global queue.
     const serverQueue = message.client.queue.get(message.guild.id);
-
     if (!args.length)
-      return message.channel.send("Mr.Hooman can't read your mind! So add in a query after the PLAY Command!");
+      return message.channel.send(embed.MISSING_QUERY_MESSAGE);
 
     //Typing indicator
     message.channel.startTyping();
@@ -38,10 +39,13 @@ module.exports = {
       song = {
         title: songInfo.videoDetails.title,
         url: songInfo.videoDetails.video_url,
-        thumbnail: songInfo.videoDetails.thumbnails[0],
-        duration: songInfo.videoDetails.duration,
+        thumbnail: songInfo.videoDetails.thumbnails[0].url,
+        duration: parseInt(songInfo.videoDetails.lengthSeconds),
         startTime: "",
+        requested: message.author.username,
       }
+
+      
     }
 
     //If there was no link, we use keywords to search for a video. Set the song object to have two keys. Title and URl.
@@ -56,17 +60,17 @@ module.exports = {
           title: video.title,
           url: video.url,
           thumbnail: video.thumbnail,
-          duration: video.duration,
+          duration: video.seconds,
           startTime: "",
+          requested: message.author.username,
         };
       } else {
-        message.channel.send('"Oops! Mr.Hooman is having trouble finding your track. Please contact his therapist!"');
+        message.channel.send(embed.ERROR_PLAYING_MESSAGE);
       }
     }
 
     //If the server queue does not exist, create one!
     if (!serverQueue) {
-
       const queueConstructor = {
         voiceChannel: voiceChannel,
         textChannel: message.channel,
@@ -85,13 +89,13 @@ module.exports = {
         videoPlayer(message.guild, queueConstructor.songs[0]);
       } catch (err) {
         message.client.queue.delete(message.guild.id);
-        message.channel.send("Oops! Mr.Hooman is having trouble playing your music. Please contact his therapist!");
+        message.channel.send(embed.ERROR_PLAYING_MESSAGE);
         console.log(err);
       }
     } else {
       serverQueue.songs.push(song);
       message.channel.stopTyping();
-      return message.channel.send(`👍 **${song.title}** added to queue!`);
+      return message.channel.send(embed.ADDED_QUEUE_MESSAGE(song));
     }
 
     //Stop tying indicator
@@ -101,7 +105,6 @@ module.exports = {
 
 //Let's Mr.Hooman Play songs
 const videoPlayer = async (guild, song) => {
-
   queue = guild.client.queue;
   const songQueue = queue.get(guild.id);
 
@@ -112,7 +115,6 @@ const videoPlayer = async (guild, song) => {
   }
 
   const stream = await ytdl(song.url, { filter: 'audioonly' });
-
   await songQueue.connection.play(stream, { seek: 0, volume: 1 })
     .on('finish', () => {
       songQueue.songs.shift();
@@ -124,5 +126,5 @@ const videoPlayer = async (guild, song) => {
   if (queue.get(guild.id).songs[0])
     queue.get(guild.id).songs[0].startTime = currentTime.toString();
 
-  await songQueue.textChannel.send(`👍 Now Playing **${song.title}**`)
+  await songQueue.textChannel.send(embed.NOW_PLAYING_MESSAGE(guild, song));
 }

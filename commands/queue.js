@@ -8,6 +8,7 @@ module.exports = {
 
     for (index in serverQueue.songs) {
       queueString += serverQueue.songs[index].title + "`,\n `"
+      if(index == 50) break;
     }
 
     queueString += " `";

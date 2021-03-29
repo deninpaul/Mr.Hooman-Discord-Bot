@@ -80,7 +80,7 @@ function dispTime(time) {
   const min = Math.floor((time / 60) % 60);
   const hour = Math.floor(time / 60 / 60);
 
-  const timeString = hour ? ('0' + hour).slice(-2) + '.' + ('0' + min).slice(-2) + '.' + ('0' + sec).slice(-2) : ('0' + min).slice(-2) + '.' + ('0' + sec).slice(-2);
+  const timeString = hour ? ('0' + hour).slice(-2) + ':' + ('0' + min).slice(-2) + ':' + ('0' + sec).slice(-2) : ('0' + min).slice(-2) + ':' + ('0' + sec).slice(-2);
 
   return timeString;
 }
